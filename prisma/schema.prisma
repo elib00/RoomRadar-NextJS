@@ -13,11 +13,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserType {
+  LANDLORD
+  TENANT
+  ADMIN
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int             @id @default(autoincrement())
+  email          String          @unique
+  username       String          @unique
+  password       String
+  type           UserType
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  profile        Profile?
+  account        Account?
+  boardingHouses BoardingHouse[] @relation("LandlordBoardingHouses")
+}
+
+model Account {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model Profile {
+  id        Int    @id @default(autoincrement())
+  firstname String
+  lastname  String
+  gender    String
+  userId    Int    @unique
+  user      User   @relation(fields: [userId], references: [id])
+}
+
+model BoardingHouse {
+  id          Int    @id @default(autoincrement())
+  name        String
+  address     String
+  description String
+  landlordId  Int
+  landlord    User?  @relation("LandlordBoardingHouses", fields: [landlordId], references: [id])
 }
