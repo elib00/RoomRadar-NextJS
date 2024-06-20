@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,29 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserType {
-  LANDLORD
-  TENANT
-  ADMIN
-}
-
 model User {
-  id             Int             @id @default(autoincrement())
-  email          String          @unique
-  username       String          @unique
-  password       String
-  type           UserType
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  profile        Profile?
-  account        Account?
-  boardingHouses BoardingHouse[] @relation("LandlordBoardingHouses")
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  type      UserType
+  account   Account?
+  profile   Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Account {
-  id     Int  @id @default(autoincrement())
-  userId Int  @unique
-  user   User @relation(fields: [userId], references: [id])
+  id             Int             @id @default(autoincrement())
+  userId         Int             @unique
+  user           User            @relation(fields: [userId], references: [id])
+  boardingHouses BoardingHouse[] @relation("TenantBoardingHouses")
+  listings       BoardingHouse[] @relation("LandlordListings")
 }
 
 model Profile {
@@ -48,10 +37,22 @@ model Profile {
 }
 
 model BoardingHouse {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   address     String
   description String
   landlordId  Int
-  landlord    User?  @relation("LandlordBoardingHouses", fields: [landlordId], references: [id])
+  createdAt   DateTime @default(now())
+  rating      Int
+  reviews     String[]
+  tenantId    Int?
+  updatedAt   DateTime @updatedAt
+  landlord    Account  @relation("TenantBoardingHouses", fields: [landlordId], references: [id])
+  tenant      Account? @relation("LandlordListings", fields: [tenantId], references: [id])
+}
+
+enum UserType {
+  LANDLORD
+  TENANT
+  ADMIN
 }
