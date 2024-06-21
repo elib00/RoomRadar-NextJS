@@ -1,6 +1,5 @@
 import { db } from "@/lib/db"
 import { UserType, UserRegistrationCredentials } from "@/lib/types";
-import { User } from "@prisma/client"; 
 
 export const createUser = async (userCredentials: UserRegistrationCredentials) => {
     try{

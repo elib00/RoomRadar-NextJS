@@ -8,8 +8,7 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
     try{
         const body = await req.json();
         const { email, username, password, firstname, lastname, gender, birthdate } = body;
-        console.log(birthdate);
-
+        
         const isExistingUserByEmail = await db.user.findUnique({
             where: { email: email } 
         });
