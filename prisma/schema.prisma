@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_MIGRATION_URL")
 }
 
 model User {
@@ -12,43 +12,58 @@ model User {
   email     String   @unique
   username  String   @unique
   password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   type      UserType
   account   Account?
   profile   Profile?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Account {
-  id             Int             @id @default(autoincrement())
-  userId         Int             @unique
-  user           User            @relation(fields: [userId], references: [id])
-  boardingHouses BoardingHouse[] @relation("TenantBoardingHouses")
-  listings       BoardingHouse[] @relation("LandlordListings")
+  id             Int                    @id @default(autoincrement())
+  userId         Int                    @unique
+  user           User                   @relation(fields: [userId], references: [id])
+  boardingHouses AccountBoardingHouse[] @relation("AccountBoardingHouses")
+  listings       AccountListing[]       @relation("AccountListings")
 }
 
 model Profile {
-  id        Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   firstname String
   lastname  String
   gender    String
-  userId    Int    @unique
-  user      User   @relation(fields: [userId], references: [id])
+  birthdate DateTime
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model BoardingHouse {
-  id          Int      @id @default(autoincrement())
-  name        String
-  address     String
-  description String
-  landlordId  Int
-  createdAt   DateTime @default(now())
-  rating      Int
-  reviews     String[]
-  tenantId    Int?
-  updatedAt   DateTime @updatedAt
-  landlord    Account  @relation("TenantBoardingHouses", fields: [landlordId], references: [id])
-  tenant      Account? @relation("LandlordListings", fields: [tenantId], references: [id])
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  address              String
+  description          String
+  createdAt            DateTime               @default(now())
+  rating               Int
+  reviews              String[]
+  updatedAt            DateTime               @updatedAt
+  accountBoardingHouse AccountBoardingHouse[]
+  accountListing       AccountListing[]
+}
+
+model AccountBoardingHouse {
+  id              Int           @id @default(autoincrement())
+  accountId       Int
+  boardingHouseId Int
+  account         Account       @relation("AccountBoardingHouses", fields: [accountId], references: [id])
+  boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id])
+}
+
+model AccountListing {
+  id              Int           @id @default(autoincrement())
+  landlordId      Int
+  boardingHouseId Int
+  account         Account       @relation("AccountListings", fields: [landlordId], references: [id])
+  boardingHouse   BoardingHouse @relation(fields: [boardingHouseId], references: [id])
 }
 
 enum UserType {

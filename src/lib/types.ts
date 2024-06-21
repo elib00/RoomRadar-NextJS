@@ -12,4 +12,5 @@ export interface UserRegistrationCredentials {
     firstname: string;
     lastname: string;
     gender: string;
+    birthdate: Date;
 }
