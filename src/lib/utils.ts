@@ -15,7 +15,6 @@ export const hashPassword = async (password: string): Promise<string> => {
 
         return hashedPassword;
     }catch(err){
-        console.log("Error hashing password: ", err);
         throw new Error("Error hashing password");
     }
 };

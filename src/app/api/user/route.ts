@@ -1,50 +1,36 @@
-import { db } from "@/lib/db";
-import bcrypt from "bcrypt";
-import { verifyPassword } from "@/lib/utils";
+import { validateUser } from "@/lib/userOperations";
+import { AuthStatus } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
-
-export const GET = async (req: NextRequest): Promise<NextResponse> => {
+export const POST = async (req: NextRequest): Promise<NextResponse> => {
     try{
         const body = await req.json();
         const { email, password } = body;
 
-        if(!email.trim() || !password.trim()){
-            return NextResponse.json({ 
-                success: false, 
-                message: "Email and password are required." 
-            }, { status: 400 });
+        const result = await validateUser(email, password);
+
+        const response = {
+            success: result?.status == AuthStatus.VALID_USER,
+            message: result?.message,
+            user: result?.user
         }
 
-        const user = await db.user.findUnique({
-            where: { email }
-        });
-
-        if(!user){
-            return NextResponse.json({ 
-                success: false, 
-                message: "Account with the given email does not exist." 
-            }, { status: 404 });
+        let code;
+        switch(result?.status){
+            case AuthStatus.INCOMPLETE_CREDENTIALS:
+                code = 400; // bad request (missing credentials)
+                break;
+            case AuthStatus.INVALID_PASSWORD:
+                code = 401 // unauthorized
+                break;
+            case AuthStatus.USER_NOT_FOUND:
+                code = 404 // not found
+                break;
+            case AuthStatus.VALID_USER:
+                code = 200 // OK
         }
 
-        const isPasswordMatch = await verifyPassword(password, user.password);
-
-        if(!isPasswordMatch){
-            return NextResponse.json({ 
-                success: false, 
-                message: "Incorrect password. Please try again."
-            }, { status: 401 });
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: "Login successful.",
-            user: {
-              id: user.id,
-              email: user.email,
-              username: user.username,
-            },
-        });
+        return NextResponse.json(response, { status: code });
 
     }catch(err: any){
         console.error(err);
