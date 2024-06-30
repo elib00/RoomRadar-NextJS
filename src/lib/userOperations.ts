@@ -93,9 +93,6 @@ export const registerUser = async (email: string, username: string, password: st
     }
 };
 
-
-
-
 export const validateUser = async (email: string, password: string): Promise<AuthResponse | undefined> => {
     let response: AuthResponse = {
         status: AuthStatus.VALID_USER,
@@ -137,7 +134,6 @@ export const validateUser = async (email: string, password: string): Promise<Aut
     }catch(err: any){
         throw new Error(err.message);
     }
-
     
     response.user = user;
     return response;
