@@ -1,5 +1,7 @@
 import AuthCard from "@/components/auth/AuthCard";
 
+import { RegisterSchema } from "@/schema";
+
 const RegisterForm = () => {
   return (
     <AuthCard
